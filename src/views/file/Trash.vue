@@ -79,46 +79,6 @@
             remove(file) {
                 this.dialog = true
                 this.removeFileId = file.id
-            },
-            filechange (e) {
-                this.input = e.target
-                if (!e.target.files.length) {
-                    return
-                }
-                this.myfile = e.target.files[0]
-
-                console.log('上传')
-                console.log(this.myfile.name)
-
-                let param = new FormData(); //创建form对象
-                param.append('file', this.myfile, this.myfile.name);//通过append向form对象添加数据
-                param.append('chunk', '0');//添加form表单中其他数据
-                let config = {
-                    headers:{'Content-Type':'multipart/form-data'}
-                }
-
-                this.$http.post(domain.imgApi + '/files', param, config)
-                    .then(response => {
-                        this.refresh()
-                    })
-
-                /*
-                 // 上传文件类型检测
-                 let ext = this.fileExt(this.myfile.name)
-                 if (this.type === 'image') {
-                 if (ext !== 'jpg' && ext !== 'jpeg' && ext !== 'png' && ext !== 'gif' && ext !== 'bmp') {
-                 this.error('只能上传图片文件！')
-                 return
-                 }
-                 }
-                 */
-                console.log('file', this.myfile.type)
-//                if (this.myfile.type.indexOf('image') !== -1) {
-//                    if (this.myfile.size / 100 > 500) {
-//                        this.compressAndUpload()
-//                        return
-//                    }
-//                }
             }
         }
     }

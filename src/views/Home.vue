@@ -16,9 +16,7 @@
 </template>
 
 <script>
-    import UiContainer from "../../node_modules/yunser-ui-vue/src/components/container/container";
     export default {
-        components: {UiContainer},
         data () {
             return {
             }

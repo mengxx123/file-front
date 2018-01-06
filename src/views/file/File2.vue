@@ -14,7 +14,6 @@
                 </ui-list-item>
             </ui-list>
 
-
             <button @click="upload">上传</button>
             =========
             <form action="http://localhost:1026/net/files" method="post" enctype="multipart/form-data">
@@ -106,13 +105,14 @@
                 console.log('上传')
                 console.log(this.myfile.name)
 
-                let param = new FormData(); //创建form对象
-                param.append('file', this.myfile, this.myfile.name);//通过append向form对象添加数据
-                param.append('chunk', '0');//添加form表单中其他数据
+                let param = new FormData()
+                param.append('file', this.myfile, this.myfile.name)
+                param.append('chunk', '0')
                 let config = {
-                    headers:{'Content-Type':'multipart/form-data'}
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
                 }
-
                 this.$http.post(domain.imgApi + '/files', param, config)
                     .then(response => {
                         this.refresh()
