@@ -1,0 +1,144 @@
+<template>
+    <ui-page name="file">
+        <ui-header title="我的文件"></ui-header>
+        <main class="page-body">
+            <input type="file" value="上传文件" @change="filechange($event)">
+
+            <ui-list v-if="files.length">
+                <ui-list-item :title="file.name" describeText="Jan 9, 2014" v-for="file in files">
+                    <ui-icon-menu slot="right" icon="more_vert" tooltip="操作">
+                        <ui-menu-item title="打开" @click="open(file)" />
+                        <ui-menu-item title="复制" />
+                        <ui-menu-item title="删除" @click="remove(file)" />
+                    </ui-icon-menu>
+                </ui-list-item>
+            </ui-list>
+
+
+            <button @click="upload">上传</button>
+            =========
+            <form action="http://localhost:1026/net/files" method="post" enctype="multipart/form-data">
+                <h2>单文件上传</h2>
+                <div class="form-group">
+                    <input type="file" name="logo" class="from-control">
+                </div>
+                <button type="submit" class="btn btn-default">上传</button>
+            </form>
+            ===
+
+
+            <input id="input-file" type="file" @change="filechange($event)" style="display: none">
+            <ui-content-block>
+                <p>云设工具致力于开发工具类 App，方便提高用户日常生活的效率。如果你有需求，我们也可以为你开发工具类 App！</p>
+                <p>给我们发邮件：admin@yunser.com</p>
+            </ui-content-block>
+
+        </main>
+        <ui-footer></ui-footer>
+        <ui-dialog title="确认删除" :open="dialog">
+            确认删除文件
+            <ui-flat-button slot="actions" @click="dialog = false" primary label="取消"/>
+            <ui-flat-button slot="actions" primary @click="removeFile" label="确定"/>
+        </ui-dialog>
+    </ui-page>
+</template>
+
+<script>
+    import {domain} from '@/config'
+
+    export default {
+        data () {
+            return {
+                dialog: false,
+                files: []
+            }
+        },
+        mounted() {
+            this.init()
+        },
+        methods: {
+            init() {
+                this.refresh()
+            },
+            open(file) {
+                window.open(domain.img1 + file.url)
+            },
+            refresh() {
+                let userId = this.$storage.get('user').id
+
+                this.$http.get(`/users/${userId}/files`)
+                    .then(response => {
+                        let data = response.data
+                        console.log(data)
+                        this.files = data
+                    },
+                    response => {
+                        console.log(response)
+                    })
+            },
+            upload() {
+                document.getElementById('input-file').click()
+            },
+            removeFile() {
+                this.dialog = false
+                this.$http.delete(domain.imgApi + '/files/' + this.removeFileId)
+                    .then(response => {
+                        let data = response.data
+                        console.log(data)
+                        this.refresh()
+                    },
+                    response => {
+                        console.log(response)
+                        alert('删除失败') // Toast
+                    })
+            },
+            remove(file) {
+                this.dialog = true
+                this.removeFileId = file.id
+            },
+            filechange (e) {
+                this.input = e.target
+                if (!e.target.files.length) {
+                    return
+                }
+                this.myfile = e.target.files[0]
+
+                console.log('上传')
+                console.log(this.myfile.name)
+
+                let param = new FormData(); //创建form对象
+                param.append('file', this.myfile, this.myfile.name);//通过append向form对象添加数据
+                param.append('chunk', '0');//添加form表单中其他数据
+                let config = {
+                    headers:{'Content-Type':'multipart/form-data'}
+                }
+
+                this.$http.post(domain.imgApi + '/files', param, config)
+                    .then(response => {
+                        this.refresh()
+                    })
+
+                /*
+                 // 上传文件类型检测
+                 let ext = this.fileExt(this.myfile.name)
+                 if (this.type === 'image') {
+                 if (ext !== 'jpg' && ext !== 'jpeg' && ext !== 'png' && ext !== 'gif' && ext !== 'bmp') {
+                 this.error('只能上传图片文件！')
+                 return
+                 }
+                 }
+                 */
+                console.log('file', this.myfile.type)
+//                if (this.myfile.type.indexOf('image') !== -1) {
+//                    if (this.myfile.size / 100 > 500) {
+//                        this.compressAndUpload()
+//                        return
+//                    }
+//                }
+            }
+        }
+    }
+</script>
+
+<style scoped>
+</style>

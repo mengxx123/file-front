@@ -1,0 +1,16 @@
+.page-content {
+    position: relative;
+    padding-left: 256px;
+}
+
+.ui-empty {
+    padding-top: 160px;
+    text-align: center;
+    .ui-empty-icon {
+        display: inline-block;
+        margin-bottom: 24px;
+    }
+    .ui-empty-text {
+        color: $color_9;
+    }
+}
