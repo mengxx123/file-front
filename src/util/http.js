@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {apiDomain} from '@/config'
+import {domain} from '@/config'
 import storage from '@/util/storage'
 
 axios.defaults.withCredentials = true
@@ -7,7 +7,7 @@ axios.defaults.withCredentials = true
 // axios.defaults.headers.post['Content-Type'] = 'application/json'
 
 const instance = axios.create({
-    baseURL: apiDomain,
+    baseURL: domain.api,
     headers: {
     }
 })

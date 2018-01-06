@@ -7,6 +7,9 @@ if (process.env.NODE_ENV === 'production') {
     imgDomain = 'http://120.79.29.47'
     apiDomain = 'http://example.yunser.com'
     domain = {
+        api: 'http://java.api.yunser.com/',
+        imgApi: 'http://java.api.yunser.com',
+        img1: 'http://img1.yunser.com'
     }
 } else {
     imgDomain = 'http://120.79.29.47'
@@ -15,6 +18,7 @@ if (process.env.NODE_ENV === 'production') {
     // apiDomain = 'http://java.api.yunser.com/'
     domain = {
         api: 'http://localhost:1030',
+        // api: 'http://java.api.yunser.com/',
         imgApi: 'http://java.api.yunser.com',
         img1: 'http://img1.yunser.com'
     }
