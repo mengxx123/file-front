@@ -1,45 +1,34 @@
 <template>
-    <ui-page name="file">
-        <ui-header title="我的文件"></ui-header>
-        <main class="page-body">
-            <input type="file" value="上传文件" @change="filechange($event)">
-
-            <ui-list v-if="files.length">
-                <ui-list-item :title="file.name" describeText="Jan 9, 2014" v-for="file in files">
-                    <ui-icon-menu slot="right" icon="more_vert" tooltip="操作">
-                        <ui-menu-item title="打开" @click="open(file)" />
-                        <ui-menu-item title="复制" />
-                        <ui-menu-item title="删除" @click="remove(file)" />
-                    </ui-icon-menu>
-                </ui-list-item>
-            </ui-list>
-
-            <button @click="upload">上传</button>
-            =========
-            <form action="http://localhost:1026/net/files" method="post" enctype="multipart/form-data">
-                <h2>单文件上传</h2>
-                <div class="form-group">
-                    <input type="file" name="logo" class="from-control">
-                </div>
-                <button type="submit" class="btn btn-default">上传</button>
-            </form>
-            ===
-
-
-            <input id="input-file" type="file" @change="filechange($event)" style="display: none">
-            <ui-content-block>
-                <p>云设工具致力于开发工具类 App，方便提高用户日常生活的效率。如果你有需求，我们也可以为你开发工具类 App！</p>
-                <p>给我们发邮件：admin@yunser.com</p>
-            </ui-content-block>
-
-        </main>
-        <ui-footer></ui-footer>
+    <my-page title="我的文件">
+        <input type="file" value="上传文件" @change="filechange($event)">
+        <ui-list v-if="files.length">
+            <ui-list-item :title="file.name" describeText="Jan 9, 2014" 
+                v-for="file in files" :key="file.id">
+                <ui-icon-menu slot="right" icon="more_vert" tooltip="操作">
+                    <ui-menu-item title="打开" @click="open(file)" />
+                    <ui-menu-item title="复制" />
+                    <ui-menu-item title="删除" @click="remove(file)" />
+                </ui-icon-menu>
+            </ui-list-item>
+        </ui-list>
+        <button @click="upload">上传</button>
+        =========
+        <form action="http://localhost:1026/net/files" method="post" enctype="multipart/form-data">
+            <h2>单文件上传</h2>
+            <div class="form-group">
+                <input type="file" name="logo" class="from-control">
+            </div>
+            <button type="submit" class="btn btn-default">上传</button>
+        </form>
+        ===
+        <input id="input-file" type="file" @change="filechange($event)" style="display: none">
+        
         <ui-dialog title="确认删除" :open="dialog">
             确认删除文件
             <ui-flat-button slot="actions" @click="dialog = false" primary label="取消"/>
             <ui-flat-button slot="actions" primary @click="removeFile" label="确定"/>
         </ui-dialog>
-    </ui-page>
+    </my-page>
 </template>
 
 <script>

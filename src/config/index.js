@@ -17,9 +17,10 @@ if (process.env.NODE_ENV === 'production') {
     apiDomain = 'http://localhost:1030'
     // apiDomain = 'http://java.api.yunser.com/'
     domain = {
-        api: 'http://localhost:1030',
+        api: 'http://localhost:1026',
         // api: 'http://java.api.yunser.com/',
-        imgApi: 'http://java.api.yunser.com',
+        imgApi: 'http://node.api.yunser.com',
+        // imgApi: 'http://localhost:1026',
         img1: 'http://img1.yunser.com'
     }
 }

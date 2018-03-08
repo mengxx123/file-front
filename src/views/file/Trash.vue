@@ -4,7 +4,8 @@
         <main class="page-body">
 
             <ui-list v-if="files.length">
-                <ui-list-item :title="file.name" describeText="Jan 9, 2014" v-for="file in files">
+                <ui-list-item :title="file.name" describeText="Jan 9, 2014" 
+                    v-for="file in files" :key="file.id">
                     <ui-icon-menu slot="right" icon="more_vert" tooltip="操作">
                         <ui-menu-item title="打开" @click="open(file)" />
                         <ui-menu-item title="复制" />

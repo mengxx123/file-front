@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 const Home = resolve => require(['@/views/Home'], resolve)
+const Temp = resolve => require(['@/views/Temp'], resolve)
 const About = resolve => require(['@/views/About'], resolve)
 const Login = resolve => require(['@/views/Login'], resolve)
 
@@ -21,10 +22,11 @@ const APP_NAME = '云设'
 let routes = [
     {
         path: '/',
-        component: Home,
-        meta: {
-            title: '首页'
-        }
+        component: Home
+    },
+    {
+        path: '/temp',
+        component: Temp
     },
     {
         path: '/about',

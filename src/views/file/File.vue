@@ -12,7 +12,8 @@
             <div v-if="!files.length">空文件夹</div>
             <ui-list v-if="files.length">
                 <ui-sub-header>最近聊天记录</ui-sub-header>
-                <ui-list-item :title="file.name" describeText="Jan 9, 2014" v-for="file in files">
+                <ui-list-item :title="file.name" describeText="Jan 9, 2014" 
+                    v-for="file in files" :key="file.id">
                     <ui-avatar icon="folder" slot="leftAvatar" v-if="file.type === 'directory'" @click="viewFile(file)"/>
                     <ui-avatar icon="assignment" backgroundColor="blue" slot="leftAvatar" v-if="file.type === 'file'" @click="viewFile(file)" />
                     <ui-icon-menu slot="right" icon="more_vert" tooltip="操作">

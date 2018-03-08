@@ -2,7 +2,6 @@ import axios from 'axios'
 import {domain} from '@/config'
 import storage from '@/util/storage'
 
-axios.defaults.withCredentials = true
 // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 // axios.defaults.headers.post['Content-Type'] = 'application/json'
 

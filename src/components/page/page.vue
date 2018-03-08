@@ -1,34 +1,86 @@
 <template>
-    <div class="page page-home">
-        <div class="page-content">
-            <slot></slot>
-        </div>
-        <ui-drawer :open="true" :docked="true">
-            <ui-list>
-                <ui-list-item title="全部文件" to="/files2"/>
-                <ui-list-item title="图片" inset/>
-                <ui-list-item title="文档" inset/>
-                <ui-list-item title="种子" inset/>
-                <ui-list-item title="视频" inset/>
-                <ui-list-item title="音乐" inset/>
-                <ui-list-item title="与我共享"/>
-                <ui-list-item title="加星文件"/>
-                <ui-list-item title="回收站" to="/trash"/>
-                <ui-list-item title="已使用 0 个字节，共 15 GB"/>
+    <ui-page :title="title || page.title" :page="page" :backable="backable" ref="page">
+        <div slot="drawer">
+            <ui-appbar title=""></ui-appbar>
+            <ui-list @itemClick="toggle()">
+                <ui-list-item title="首页" to="/">
+                    <ui-icon slot="left" value="grade"/>
+                </ui-list-item>
+                <ui-list-item title="临时网盘" to="/temp">
+                    <ui-icon slot="left" value="grade"/>
+                </ui-list-item>
+                <ui-list-item title="关于" to="/about">
+                    <ui-icon slot="left" value="grade"/>
+                </ui-list-item>
             </ui-list>
-        </ui-drawer>
-    </div>
+        </div>
+        <slot></slot>
+    </ui-page>
 </template>
 
 <script>
     export default {
         data() {
             return {
+                open: false,
+                docked: true
             }
         },
-        mounted() {
+        props: {
+            title: {
+                type: String,
+                default: ''
+            },
+            name: {
+                type: String,
+                default: 'default'
+            },
+            page: {
+                type: Object,
+                default: function () {
+                    return {
+                        title: '云设'
+                    }
+                }
+            },
+            backable: {
+                type: Boolean,
+                default: false
+            }
         },
         methods: {
+            toggle() {
+                console.log(this.$refs.page)
+            }
         }
     }
 </script>
+
+<style lang="scss" scoped>
+    .ui-page {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+    }
+    .page-body {
+        min-height: 500px;
+    }
+    .container-main {
+        padding-top: 16px;
+    }
+    .page-content {
+        position: absolute;
+        top: 0;
+        left: 256px;
+        right: 0;
+        bottom: 0;
+    }
+    .page-container {
+        padding: 16px;
+    }
+    .admin-container {
+        padding: 16px;
+    }
+</style>
