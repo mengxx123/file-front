@@ -3,6 +3,7 @@ import Router from 'vue-router'
 
 const Home = resolve => require(['@/views/Home'], resolve)
 const Temp = resolve => require(['@/views/Temp'], resolve)
+const Link = resolve => require(['@/views/Link'], resolve)
 const About = resolve => require(['@/views/About'], resolve)
 const Login = resolve => require(['@/views/Login'], resolve)
 
@@ -27,6 +28,10 @@ let routes = [
     {
         path: '/temp',
         component: Temp
+    },
+    {
+        path: '/link',
+        component: Link
     },
     {
         path: '/about',
