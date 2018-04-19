@@ -58,6 +58,19 @@
                 // let data = window.intent.data
                 console.log('要处理的数据')
                 console.log(window.intent)
+                if (window.intent.type.includes('text/')) {
+                    this.files.push({
+                        type: 'text',
+                        name: '666.txt',
+                        data: window.intent.data
+                    })
+                } else if (window.intent.type.includes('image/')) {
+                    this.files.push({
+                        type: 'image',
+                        name: '666.jpg',
+                        data: window.intent.data
+                    })
+                }
             },
             filechange (e) {
                 this.input = e.target
