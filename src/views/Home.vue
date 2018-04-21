@@ -9,7 +9,7 @@
                 <a class="remove" href="#" @click.prevent="removeFile(index)">删除</a>
             </li>
         </ul>
-        <ui-dialog :open="dialog" title="保存文本" @close="close">
+        <ui-dialog :open="dialog" title="保存文件" @close="close">
             <ui-text-field v-model="fileName" />
             <ui-flat-button slot="actions" @click="close" primary label="取消"/>
             <ui-flat-button slot="actions" primary @click="save" label="确定"/>
@@ -91,7 +91,7 @@
             },
             saveText(text) {
                 this.dialog = true
-                this.fileName = window.intent.extras.fileName || ''
+                this.fileName = window.intent.action.extras.fileName || ''
                 this.data = text
             },
             saveImage(text) {
