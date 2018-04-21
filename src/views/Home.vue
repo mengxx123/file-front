@@ -5,7 +5,8 @@
             <li class="item" v-for="file, index in files"
                 @click="selectFile(file)"
                 :style="{cursor: isPick ? 'pointer' : 'default'}">
-                {{ file.name }}
+                <img class="icon" :src="iconUrl(file.name)">
+                <span class="name">{{ file.name }}</span>
                 <a class="remove" href="#" @click.prevent="removeFile(index)">删除</a>
                 <a class="download" href="#" @click.prevent="download(file)">下载</a>
             </li>
@@ -15,6 +16,17 @@
             <ui-flat-button slot="actions" @click="close" primary label="取消"/>
             <ui-flat-button slot="actions" primary @click="save" label="确定"/>
         </ui-dialog>
+        <ui-drawer class="viewer-box" right :docked="false" :open="ViewerVisible" @close="toggle()">
+            <ui-appbar :title="viewedFile.name" v-if="viewedFile">
+                <ui-icon-button icon="close" slot="left" @click="toggle()" />
+                <ui-icon-button icon="open_with" slot="right" @click="openWith()" title="用其他应用打开" />
+            </ui-appbar>
+            <div class="body" v-if="viewedFile">
+                <pre v-if="viewedFile.type === 'text'">{{ viewedFile.data }}</pre>
+                <img :src="viewedFile.data" v-else-if="viewedFile.type === 'image'">
+                <div v-else>不支持的文件类型</div>
+            </div>
+        </ui-drawer>
         <!-- <h1>文件</h1>
         <router-link to="/files">本地文件列表</router-link>
         <router-link to="/files2">网络文件列表</router-link> -->
@@ -23,6 +35,7 @@
 
 <script>
     const saveAs = window.saveAs
+    const Intent = window.Intent
 
     export default {
         data () {
@@ -32,6 +45,8 @@
                 dialog: false,
                 files: [
                 ],
+                viewedFile: null,
+                ViewerVisible: false,
                 page: {
                     menu: [
                         // {
@@ -48,6 +63,9 @@
             this.init()
         },
         methods: {
+            toggle () {
+                this.ViewerVisible = !this.ViewerVisible
+            },
             init() {
                 this.files = this.$storage.get('files', [
                     {
@@ -113,14 +131,44 @@
                 console.log(this.myfile.name)
             },
             selectFile(file) {
-                if (!window.intent) {
-                    return
+                if (window.intent) {
+                    window.intent.postResult(file.data)
+                    setTimeout(() => {
+                        let owner = window.opener || window.parent
+                        owner.window.close()
+                    }, 100)
+                } else {
+                    this.ViewerVisible = true
+                    this.viewedFile = file
+                    // let extension = this.getFileExtension(fileName)
+                    // if (file.type === 'text') {
+                    // }
                 }
-                window.intent.postResult(file.data)
-                setTimeout(() => {
-                    let owner = window.opener || window.parent
-                    owner.window.close()
-                }, 100)
+            },
+            openWith() {
+                if (this.viewedFile.type === 'text') {
+                    var intent = new Intent({
+                        action: 'http://webintent.yunser.com/view',
+                        type: 'text/*',
+                        data: this.viewedFile.data
+                    })
+                    navigator.startActivity(intent, () => {
+                        console.log('成功了')
+                    }, data => {
+                        console.log('失败')
+                    })
+                } else if (this.viewedFile.type === 'image') {
+                    var intent = new Intent({
+                        action: 'http://webintent.yunser.com/view',
+                        type: 'image/*',
+                        data: this.viewedFile.data
+                    })
+                    navigator.startActivity(intent, () => {
+                        console.log('成功了')
+                    }, data => {
+                        console.log('失败')
+                    })
+                }
             },
             open() {
                 this.dialog = true
@@ -149,6 +197,19 @@
                 } else if (file.type === 'image') {
                     window.open(file.data)
                 }
+            },
+            iconUrl(fileName) {
+                let extension = this.getFileExtension(fileName)
+                let types = ['css', 'doc', 'html', 'jpeg', 'jpg', 'mp3', 'png', 'txt']
+                if (types.includes(extension)) {
+                    return '/static/icon/' + extension + '.svg'
+                } else {
+                    return '/static/icon/default.svg'
+                }
+            },
+            getFileExtension(fileName) {
+                let arr = fileName.split('.')
+                return arr[arr.length - 1]
             }
         }
     }
@@ -156,13 +217,30 @@
 
 <style lang="scss" scoped>
 .my-file-list {
-    max-width: 400px;
+    margin-top: 16px;
+    max-width: 1000px;
     .item {
+        float: left;
         position: relative;
         padding: 16px;
+        width: 300px;
+        height: 72px;
+        margin-right: 16px;
         margin-bottom: 16px;
-        border: 1px solid #eee;
+        // border: 1px solid #eee;
+        box-shadow: 0 1px 6px rgba(0,0,0,.117647), 0 1px 4px rgba(0,0,0,.117647);
         cursor: pointer;
+    }
+    .icon {
+        width: 40px;
+        height: 40px;
+        margin-right: 8px;
+        float: left;
+    }
+    .name {
+        display: block;
+        float: left;
+        line-height: 40px;
     }
     .remove {
         position: absolute;
@@ -173,6 +251,14 @@
         position: absolute;
         top: 16px;
         right: 56px;
+    }
+}
+.viewer-box {
+    // width: 400px;
+    width: 100%;
+    max-width: 800px;
+    .body {
+        padding: 16px;
     }
 }
 </style>
