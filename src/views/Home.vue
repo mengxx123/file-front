@@ -7,6 +7,7 @@
                 :style="{cursor: isPick ? 'pointer' : 'default'}">
                 {{ file.name }}
                 <a class="remove" href="#" @click.prevent="removeFile(index)">删除</a>
+                <a class="download" href="#" @click.prevent="download(file)">下载</a>
             </li>
         </ul>
         <ui-dialog :open="dialog" title="保存文件" @close="close">
@@ -21,6 +22,8 @@
 </template>
 
 <script>
+    const saveAs = window.saveAs
+
     export default {
         data () {
             return {
@@ -110,6 +113,9 @@
                 console.log(this.myfile.name)
             },
             selectFile(file) {
+                if (!window.intent) {
+                    return
+                }
                 window.intent.postResult(file.data)
                 setTimeout(() => {
                     let owner = window.opener || window.parent
@@ -134,6 +140,15 @@
             removeFile(index) {
                 this.files.splice(index, 1)
                 this.$storage.set('files', this.files)
+            },
+            download(file) {
+                console.log('download', file)
+                if (file.type === 'text') {
+                    let f = new File([file.data], {type: 'text/plain;charset=utf-8'})
+                    saveAs(f, file.name)
+                } else if (file.type === 'image') {
+                    window.open(file.data)
+                }
             }
         }
     }
@@ -153,6 +168,11 @@
         position: absolute;
         top: 16px;
         right: 16px;
+    }
+    .download {
+        position: absolute;
+        top: 16px;
+        right: 56px;
     }
 }
 </style>
