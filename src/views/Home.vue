@@ -132,7 +132,9 @@
             },
             selectFile(file) {
                 if (window.intent) {
-                    window.intent.postResult(file.data)
+                    window.intent.postResult(file.data, {
+                        fileName: file.name
+                    })
                     setTimeout(() => {
                         let owner = window.opener || window.parent
                         owner.window.close()
@@ -147,7 +149,7 @@
             },
             openWith() {
                 if (this.viewedFile.type === 'text') {
-                    var intent = new Intent({
+                    let intent = new Intent({
                         action: 'http://webintent.yunser.com/view',
                         type: 'text/*',
                         data: this.viewedFile.data
@@ -158,9 +160,20 @@
                         console.log('失败')
                     })
                 } else if (this.viewedFile.type === 'image') {
-                    var intent = new Intent({
+                    let intent = new Intent({
                         action: 'http://webintent.yunser.com/view',
                         type: 'image/*',
+                        data: this.viewedFile.data
+                    })
+                    navigator.startActivity(intent, () => {
+                        console.log('成功了')
+                    }, data => {
+                        console.log('失败')
+                    })
+                } else {
+                    let intent = new Intent({
+                        action: 'http://webintent.yunser.com/view',
+                        type: '*/*',
                         data: this.viewedFile.data
                     })
                     navigator.startActivity(intent, () => {
