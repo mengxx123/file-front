@@ -249,32 +249,14 @@
                 // let data = window.intent.data
                 console.log('要处理的数据')
                 console.log(window.intent)
-                if (window.intent.action.action.includes('save')) {
-                    if (window.intent.type.includes('text/')) {
-                        this.saveText(window.intent.data)
-                    } else if (window.intent.type.includes('image/')) {
-                        this.saveImage(window.intent.data)
-                    }
-                } else if (window.intent.action.action.includes('pick')) {
-                    this.isPick = true
-                } else if (window.intent.data) {
+                this.isPick = this.$route.path.includes('pick')
+                if (!this.isPick) {
                     if (window.intent.type.includes('text/')) {
                         this.saveText(window.intent.data)
                     } else if (window.intent.type.includes('image/')) {
                         this.saveImage(window.intent.data)
                     }
                 }
-            },
-            saveText(text) {
-                this.dialog = true
-                this.fileName = window.intent.action.extras.fileName || ''
-                this.data = text
-            },
-            saveImage(text) {
-                this.dialog = true
-                // 123.png
-                this.fileName = window.intent.action.extras.fileName || ''
-                this.data = text
             },
             filechange (e) {
                 this.input = e.target
@@ -375,7 +357,7 @@
             async save() {
                 this.dialog = false
                 this.files.unshift({
-                    type: 'text',
+                    type: window.intent.type,
                     name: this.fileName,
                     data: this.data
                 })
