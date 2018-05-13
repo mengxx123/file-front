@@ -253,8 +253,6 @@
                     } else if (window.intent.type.includes('image/')) {
                         this.saveImage(window.intent.data)
                     }
-                    let owner = window.opener || window.parent
-                    owner.window.close()
                 } else if (window.intent.action.action.includes('pick')) {
                     this.isPick = true
                 } else if (window.intent.data) {
@@ -263,8 +261,6 @@
                     } else if (window.intent.type.includes('image/')) {
                         this.saveImage(window.intent.data)
                     }
-                    let owner = window.opener || window.parent
-                    owner.window.close()
                 }
             },
             saveText(text) {
