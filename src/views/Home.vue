@@ -354,6 +354,17 @@
             close() {
                 this.dialog = false
             },
+            saveText(text) {
+                this.dialog = true
+                this.fileName = window.intent.action.extras.fileName || ''
+                this.data = text
+            },
+            saveImage(text) {
+                this.dialog = true
+                // 123.png
+                this.fileName = window.intent.action.extras.fileName || ''
+                this.data = text
+            },
             async save() {
                 this.dialog = false
                 this.files.unshift({
