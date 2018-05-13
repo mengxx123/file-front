@@ -26,6 +26,14 @@ let routes = [
         component: Home
     },
     {
+        path: '/save',
+        component: Home
+    },
+    {
+        path: '/pick',
+        component: Home
+    },
+    {
         path: '/temp',
         component: Temp
     },

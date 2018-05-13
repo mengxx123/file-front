@@ -240,6 +240,8 @@
                 // this.saveText('666666666666666666')
             },
             initWebIntents() {
+                console.log('路径')
+                // console.log(this.$route.path)
                 if (!window.intent) {
                     return
                 }
@@ -299,7 +301,8 @@
                 }
             },
             selectFile(file) {
-                if (window.intent) {
+                this.isPick = this.$route.path.includes('pick')
+                if (this.isPick) {
                     window.intent.postResult(file.data, {
                         fileName: file.name
                     })
