@@ -355,14 +355,22 @@
                 this.dialog = false
             },
             saveText(text) {
+                let fileName = ''
+                if (window.intent.action.extras && window.intent.action.extras.fileName) {
+                    fileName = window.intent.action.extras.fileName
+                }
                 this.dialog = true
-                this.fileName = window.intent.action.extras.fileName || ''
+                this.fileName = fileName
                 this.data = text
             },
             saveImage(text) {
                 this.dialog = true
                 // 123.png
-                this.fileName = window.intent.action.extras.fileName || ''
+                let fileName = ''
+                if (window.intent.action.extras && window.intent.action.extras.fileName) {
+                    fileName = window.intent.action.extras.fileName
+                }
+                this.fileName = fileName
                 this.data = text
             },
             async save() {
