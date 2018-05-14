@@ -7,20 +7,26 @@
                     <ui-menu>
                         <ui-menu-item title="文本文件" @click="newFile" />
                     </ui-menu>
+                    <ui-menu>
+                        <ui-menu-item title="文件夹" @click="newFolder" />
+                    </ui-menu>
                 </ui-popover>
                 <ui-raised-button class="file-select-btn" label="上传文件" secondary>
-                    <!-- <input type="file" class="ui-file-button" accept="image/*" @change="fileChange($event)"> -->
                     <input type="file" class="ui-file-button" @change="fileChange($event)">
                 </ui-raised-button>
             </div>
             <div class="right">
             </div>
         </div>
+        <div>当前目录：{{ rootPath }}
+            <a href="#" @click.prevent="back">返回上一级</a>
+        </div>
+        <div class="empty" v-if="!files.length">暂无文件</div>
         <ul class="my-file-list">
             <li class="item" v-for="file, index in files" :key="file.id">
                 <div class="link"
                     @click="selectFile(file)">
-                    <img class="icon" :src="iconUrl(file.name)">
+                    <img class="icon" :src="iconUrl(file)">
                     <div class="info">
                         <div class="name">{{ file.name }}</div>
                         <div class="size">{{ file.size | size }}</div>
@@ -35,7 +41,8 @@
                     >
                     <ui-menu-item title="重命名" @click.prevent="rename(file)" />
                     <ui-menu-item title="下载" @click.prevent="download(file)" />
-                    <ui-menu-item title="删除" @click.prevent="removeFile(index)" />
+                    <ui-menu-item title="删除" @click.prevent="removeFile(file)" />
+                    <ui-menu-item title="快速复制" @click.prevent="quickCopyFile(file)" />
                     <ui-menu-item title="属性" @click.prevent="viewAttribute(file)" />
                 </ui-icon-menu>
                 <!-- <a class="remove" href="#" @click.prevent="removeFile(index)">删除</a> -->
@@ -50,7 +57,7 @@
         </ui-dialog>
         <ui-dialog :open="renameVisible" title="重命名" @close="toggleRename">
             <ui-text-field v-model="newName" />
-            <ui-flat-button slot="actions" @click="toggleRename" primary label="取消"/>
+            <ui-flat-button slot="actions" @click.nactive="toggleRename" primary label="取消"/>
             <ui-flat-button slot="actions" primary @click="renameOK" label="确定"/>
         </ui-dialog>
         <ui-drawer class="viewer-box" right :docked="false" :open="ViewerVisible" @close="toggle()">
@@ -131,6 +138,7 @@
     export default {
         data () {
             return {
+                rootPath: '/',
                 isPick: false,
                 fileName: '',
                 dialog: false,
@@ -170,22 +178,75 @@
             }
         },
         methods: {
-            async newOk() {
-                this.newVisible = false
-                this.files.unshift({
-                    type: 'text/plain',
-                    name: this.newFileName,
-                    data: '',
-                    size: 0
+            back() {
+                if (this.rootPath === '/') {
+                    return
+                }
+                let index = this.rootPath.lastIndexOf('/')
+                this.rootPath = this.rootPath.substring(0, index)
+                if (!this.rootPath) {
+                    this.rootPath = '/'
+                }
+                this.loadFile()
+            },
+            toggleRename() {
+                this.nameVisible = !this.nameVisible
+            },
+            async addFile(file) {
+                let id = this.getId()
+                let files = await localforage.getItem('files')
+                files.unshift({
+                    id: id,
+                    path: this.rootPath,
+                    type: file.type,
+                    name: file.name,
+                    size: file.size,
+                    data: file.data
                 })
-                await localforage.setItem('files', this.files)
+                await localforage.setItem('files', files)
+                this.loadFile()
+            },
+            quickCopyFile(file) {
+                let index = file.name.lastIndexOf('.')
+                if (index === -1) {
+                    file.name = file.name + ' 复制'
+                } else {
+                    file.name = file.name.substring(0, index) + ' 复制' + file.name.substring(index)
+                }
+
+                this.addFile(file)
+            },
+            newOk() {
+                this.newVisible = false
+                if (this.newFileType === 'folder') {
+                    this.addFile({
+                        type: 'folder',
+                        name: this.newFileName,
+                        size: 0
+                    })
+                } else {
+                    this.addFile({
+                        type: 'text/plain',
+                        name: this.newFileName,
+                        data: '',
+                        size: 0
+                    })
+                }
             },
             toggleNew() {
                 this.newVisible = !this.newVisible
             },
             newFile() {
+                this.newName = ''
                 this.menuVisible = false
                 this.newVisible = true
+                this.newFileType = 'text'
+            },
+            newFolder() {
+                this.newName = ''
+                this.menuVisible = false
+                this.newVisible = true
+                this.newFileType = 'folder'
             },
             toggleMenu () {
                 this.menuVisible = !this.menuVisible
@@ -202,7 +263,14 @@
             async renameOK() {
                 this.renameVisible = false
                 this.renameFile.name = this.newName
-                await localforage.setItem('files', this.files)
+                let files = localforage.getItem('files')
+                for (let i = 0; i < files.length; i++) {
+                    if (files[i].id === this.renameFile.id) {
+                        files.splice(i, 1, this.renameFile)
+                        break
+                    }
+                }
+                await localforage.setItem('files', files)
             },
             rename(file) {
                 this.renameFile = file
@@ -212,29 +280,18 @@
             toggle () {
                 this.ViewerVisible = !this.ViewerVisible
             },
-            async init() {
-                this.files = await localforage.getItem('files')
-                if (!this.files) {
-                    this.files = [
-                        {
-                            type: 'text',
-                            name: '123.txt',
-                            data: '121212\n33333'
-                        },
-                        {
-                            type: 'text',
-                            name: '123.json',
-                            data: '{name: "张三",apge: 12}'
-                        },
-                        {
-                            type: 'image',
-                            name: '123.svg',
-                            data: 'data:image/svg+xml;base64,PHN2ZyBkYXRhLXYtM2I1N2FkYWM9IiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI1MDAiPjxyZWN0IHg9IjE2IiB5PSIxMjgiIHdpZHRoPSIxNDAiIGhlaWdodD0iNDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIiB0aXRsZT0i5qC555uu5b2VIj48L3JlY3Q+PHRleHQgeD0iODYiIHk9IjE0OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+5qC555uu5b2VPC90ZXh0PjxyZWN0IHg9IjE4OCIgeT0iMTYiIHdpZHRoPSIxNDAiIGhlaWdodD0iNDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIiB0aXRsZT0i56ys5LiAIj48L3JlY3Q+PHRleHQgeD0iMjU4IiB5PSIzNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+56ys5LiAPC90ZXh0PjxsaW5lIHgxPSIxNTYiIHkxPSIxNDgiIHgyPSIxNzIiIHkyPSIxNDgiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIj48L2xpbmU+PGxpbmUgeDE9IjE3MiIgeTE9IjE0OCIgeDI9IjE3MiIgeTI9IjM2IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSI+PC9saW5lPjxsaW5lIHgxPSIxNzIiIHkxPSIzNiIgeDI9IjE4OCIgeTI9IjM2IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSI+PC9saW5lPjxyZWN0IHg9IjE4OCIgeT0iMTAwIiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjQwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIgdGl0bGU9IuWVhuWTgeS/oeaBr+euoeeQhuaooeWdlyI+PC9yZWN0Pjx0ZXh0IHg9IjI1OCIgeT0iMTIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj7llYblk4Hkv6Hmga/nrqHnkIbmqKHlnZc8L3RleHQ+PHJlY3QgeD0iMzYwIiB5PSI3MiIgd2lkdGg9IjE0MCIgaGVpZ2h0PSI0MCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiIHRpdGxlPSLnrKwxIj48L3JlY3Q+PHRleHQgeD0iNDMwIiB5PSI5MiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+56ysMTwvdGV4dD48bGluZSB4MT0iMzI4IiB5MT0iMTIwIiB4Mj0iMzQ0IiB5Mj0iMTIwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSI+PC9saW5lPjxsaW5lIHgxPSIzNDQiIHkxPSIxMjAiIHgyPSIzNDQiIHkyPSI5MiIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiPjwvbGluZT48bGluZSB4MT0iMzQ0IiB5MT0iOTIiIHgyPSIzNjAiIHkyPSI5MiIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiPjwvbGluZT48cmVjdCB4PSIzNjAiIHk9IjEyOCIgd2lkdGg9IjE0MCIgaGVpZ2h0PSI0MCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiIHRpdGxlPSLnrKwyIj48L3JlY3Q+PHRleHQgeD0iNDMwIiB5PSIxNDgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPuesrDI8L3RleHQ+PGxpbmUgeDE9IjMyOCIgeTE9IjEyMCIgeDI9IjM0NCIgeTI9IjEyMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiPjwvbGluZT48bGluZSB4MT0iMzQ0IiB5MT0iMTIwIiB4Mj0iMzQ0IiB5Mj0iMTQ4IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSI+PC9saW5lPjxsaW5lIHgxPSIzNDQiIHkxPSIxNDgiIHgyPSIzNjAiIHkyPSIxNDgiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIj48L2xpbmU+PGxpbmUgeDE9IjE1NiIgeTE9IjE0OCIgeDI9IjE3MiIgeTI9IjE0OCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiPjwvbGluZT48bGluZSB4MT0iMTcyIiB5MT0iMTQ4IiB4Mj0iMTcyIiB5Mj0iMTIwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSI+PC9saW5lPjxsaW5lIHgxPSIxNzIiIHkxPSIxMjAiIHgyPSIxODgiIHkyPSIxMjAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIj48L2xpbmU+PHJlY3QgeD0iMTg4IiB5PSIxODQiIHdpZHRoPSIxNDAiIGhlaWdodD0iNDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIiB0aXRsZT0i56ys5LiJIj48L3JlY3Q+PHRleHQgeD0iMjU4IiB5PSIyMDQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiPuesrOS4iTwvdGV4dD48bGluZSB4MT0iMTU2IiB5MT0iMTQ4IiB4Mj0iMTcyIiB5Mj0iMTQ4IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSI+PC9saW5lPjxsaW5lIHgxPSIxNzIiIHkxPSIxNDgiIHgyPSIxNzIiIHkyPSIyMDQiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIj48L2xpbmU+PGxpbmUgeDE9IjE3MiIgeTE9IjIwNCIgeDI9IjE4OCIgeTI9IjIwNCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiPjwvbGluZT48cmVjdCB4PSIxODgiIHk9IjI0MCIgd2lkdGg9IjE0MCIgaGVpZ2h0PSI0MCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiIHRpdGxlPSLnrKzlm5siPjwvcmVjdD48dGV4dCB4PSIyNTgiIHk9IjI2MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+56ys5ZubPC90ZXh0PjxsaW5lIHgxPSIxNTYiIHkxPSIxNDgiIHgyPSIxNzIiIHkyPSIxNDgiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxIj48L2xpbmU+PGxpbmUgeDE9IjE3MiIgeTE9IjE0OCIgeDI9IjE3MiIgeTI9IjI2MCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEiPjwvbGluZT48bGluZSB4MT0iMTcyIiB5MT0iMjYwIiB4Mj0iMTg4IiB5Mj0iMjYwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMSI+PC9saW5lPjwvc3ZnPg=='
-                        }
-                    ]
-                }
+            init() {
+                this.loadFile()
                 this.initWebIntents()
                 this.debug()
+            },
+            async loadFile() {
+                let files = await localforage.getItem('files')
+                if (!files) {
+                    this.files = []
+                    await localforage.setItem('files', [])
+                }
+                this.files = files.filter(file => file.path === this.rootPath)
             },
             debug() {
                 // this.saveText('666666666666666666')
@@ -258,7 +315,20 @@
                     }
                 }
             },
-            filechange (e) {
+            getMineType(fileName) {
+                let index = fileName.lastIndexOf('.')
+                if (index === -1) {
+                    return ''
+                }
+                let ext = fileName.substring(index + 1)
+                console.log('格栅板', index, ext)
+                switch (ext) {
+                    case 'md':
+                        return 'text/plain'
+                }
+                return ''
+            },
+            fileChange(e) {
                 this.input = e.target
                 if (!e.target.files.length) {
                     return
@@ -267,14 +337,13 @@
                 console.log('上传')
                 console.log(this.myfile)
                 let fr = new FileReader()
-                fr.onloadend = async e => {
-                    this.files.unshift({
-                        type: this.myfile.type,
+                fr.onloadend = e => {
+                    this.addFile({
+                        type: this.myfile.type || this.getMineType(this.myfile.name),
                         name: this.myfile.name,
                         data: e.target.result,
                         size: this.myfile.size
                     })
-                    await localforage.setItem('files', this.files)
                 }
                 if (this.myfile.type.match(/^image/)) {
                     fr.readAsDataURL(this.myfile)
@@ -283,6 +352,15 @@
                 }
             },
             selectFile(file) {
+                if (file.type === 'folder') {
+                    if (this.rootPath === '/') {
+                        this.rootPath = '/' + file.name
+                    } else {
+                        this.rootPath = this.rootPath + '/' + file.name
+                    }
+                    this.loadFile()
+                    return
+                }
                 this.isPick = this.$route.path.includes('pick')
                 if (this.isPick) {
                     window.intent.postResult(file.data, {
@@ -310,9 +388,16 @@
                     navigator.startActivity(intent, async data => {
                         if (data) {
                             this.viewedFile.data = data
-                            await localforage.setItem('files', this.files)
+                            let files = await localforage.getItem('files')
+                            for (let i = 0; i < files.length; i++) {
+                                if (files[i].id === this.viewedFile.id) {
+                                    files.splice(i, 1, this.viewedFile)
+                                    break
+                                }
+                            }
+                            await localforage.setItem('files', files)
                         }
-                        console.log('成功了')
+                        console.log('成功了', data)
                     }, data => {
                         console.log('失败')
                     })
@@ -325,7 +410,14 @@
                     navigator.startActivity(intent, async data => {
                         if (data) {
                             this.viewedFile.data = data
-                            await localforage.setItem('files', this.files)
+                            let files = await localforage.getItem('files')
+                            for (let i = 0; i < files.length; i++) {
+                                if (files[i].id === this.viewedFile.id) {
+                                    files.splice(i, 1, this.viewedFile)
+                                    break
+                                }
+                            }
+                            await localforage.setItem('files', files)
                         }
                         console.log('成功了')
                     }, data => {
@@ -340,7 +432,14 @@
                     navigator.startActivity(intent, async data => {
                         if (data) {
                             this.viewedFile.data = data
-                            await localforage.setItem('files', this.files)
+                            let files = await localforage.getItem('files')
+                            for (let i = 0; i < files.length; i++) {
+                                if (files[i].id === this.viewedFile.id) {
+                                    files.splice(i, 1, this.viewedFile)
+                                    break
+                                }
+                            }
+                            await localforage.setItem('files', files)
                         }
                         console.log('成功了')
                     }, data => {
@@ -373,22 +472,34 @@
                 this.fileName = fileName
                 this.data = text
             },
-            async save() {
+            save() {
                 this.dialog = false
-                this.files.unshift({
+                this.addFile({
                     type: window.intent.type,
                     name: this.fileName,
                     data: this.data
                 })
-                await localforage.setItem('files', this.files)
+            },
+            getId() {
+                return new Date().getTime()
             },
             viewAttribute(file) {
                 this.attrVisible = true
                 this.viewedFile = file
             },
-            async removeFile(index) {
-                this.files.splice(index, 1)
-                await localforage.setItem('files', this.files)
+            async removeFile(file) {
+                let files = await localforage.getItem('files')
+                for (let i = 0; i < files.length; i++) {
+                    if (files[i].id === file.id) {
+                        files.splice(i, 1)
+                        break
+                    }
+                }
+                if (file.type === 'folder') {
+                    files = files.filter(f => f.path !== file.path + '/' + file.name)
+                }
+                await localforage.setItem('files', files)
+                this.loadFile()
             },
             download(file) {
                 console.log('download', file)
@@ -399,7 +510,11 @@
                     window.open(file.data)
                 }
             },
-            iconUrl(fileName) {
+            iconUrl(file) {
+                if (file.type === 'folder') {
+                    return '/static/icon/folder.svg'
+                }
+                let fileName = file.name
                 let extension = this.getFileExtension(fileName)
                 let types = ['css', 'doc', 'html', 'jpeg', 'jpg', 'mp3', 'png', 'txt']
                 if (types.includes(extension)) {
@@ -419,6 +534,10 @@
 <style lang="scss" scoped>
 @import "../scss/var";
 
+.empty {
+    padding: 16px 0;
+    color: #999;
+}
 .tool-box {
     margin-bottom: 16px;
     @include clearfix;
@@ -503,11 +622,14 @@
         right: 0;
         bottom: 0;
         padding: 16px;
+        // background-color: #f1f1f1;
+        overflow: auto;
         img {
             display: block;
             margin: 0 auto;
             max-width: 100%;
             max-height: 100%;
+            border: 1px solid #ccc;
         }
     }
 }
