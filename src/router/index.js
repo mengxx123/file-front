@@ -15,6 +15,7 @@ const File2 = resolve => require(['@/views/file/File2'], resolve)
 const FileDetail = resolve => require(['@/views/file/FileDetail'], resolve)
 const FileEdit = resolve => require(['@/views/file/FileEdit'], resolve)
 const Trash = resolve => require(['@/views/file/Trash'], resolve)
+const ImageTemp = resolve => require(['@/views/ImageTemp'], resolve)
 
 Vue.use(Router)
 
@@ -69,10 +70,6 @@ let routes = [
             title: '页面找不到了'
         }
     },
-    {
-        path: '*',
-        redirect: '/404'
-    },
     // 文件相关
     {
         path: '/files',
@@ -88,6 +85,14 @@ let routes = [
     }, {
         path: '/files/detail',
         component: FileDetail
+    },
+    {
+        path: '/image/temp',
+        component: ImageTemp
+    },
+    {
+        path: '*',
+        redirect: '/404'
     }
 ]
 
