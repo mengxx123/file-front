@@ -4,12 +4,12 @@ import Router from 'vue-router'
 const Home = resolve => require(['@/views/Home'], resolve)
 const Temp = resolve => require(['@/views/Temp'], resolve)
 const Link = resolve => require(['@/views/Link'], resolve)
-const About = resolve => require(['@/views/About'], resolve)
 const Login = resolve => require(['@/views/Login'], resolve)
 
 const Error404 = resolve => require(['@/views/error/Error404'], resolve)
 
 // 文件
+const Viewer = resolve => require(['@/views/Viewer'], resolve)
 const File = resolve => require(['@/views/file/File'], resolve)
 const File2 = resolve => require(['@/views/file/File2'], resolve)
 const FileDetail = resolve => require(['@/views/file/FileDetail'], resolve)
@@ -31,6 +31,10 @@ let routes = [
         component: Home
     },
     {
+        path: '/viewer',
+        component: Viewer
+    },
+    {
         path: '/pick',
         component: Home
     },
@@ -41,13 +45,6 @@ let routes = [
     {
         path: '/link',
         component: Link
-    },
-    {
-        path: '/about',
-        component: About,
-        meta: {
-            title: '关于'
-        }
     },
     {
         path: '/trash',
@@ -61,13 +58,6 @@ let routes = [
         component: Login,
         meta: {
             title: '登陆'
-        }
-    },
-    {
-        path: '/404',
-        component: Error404,
-        meta: {
-            title: '页面找不到了'
         }
     },
     // 文件相关
@@ -92,7 +82,7 @@ let routes = [
     },
     {
         path: '*',
-        redirect: '/404'
+        component: Error404
     }
 ]
 

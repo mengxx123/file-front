@@ -8,8 +8,9 @@ if (process.env.NODE_ENV === 'production') {
     apiDomain = 'http://example.yunser.com'
     domain = {
         api: 'http://java.api.yunser.com/',
-        imgApi: 'http://java.api.yunser.com',
-        img1: 'http://img1.yunser.com'
+        api2: 'https://nodeapi2.yunser.net',
+        imgApi: 'https://nodeapi.yunser.com',
+        img1: 'https://img1.yunser.com'
     }
 } else {
     imgDomain = 'http://120.79.29.47'
@@ -18,10 +19,12 @@ if (process.env.NODE_ENV === 'production') {
     // apiDomain = 'http://java.api.yunser.com/'
     domain = {
         api: 'http://localhost:1026',
+        api2: 'http://localhost:1028',
+        // api2: 'https://nodeapi2.yunser.net',
         // api: 'http://java.api.yunser.com/',
-        imgApi: 'http://node.api.yunser.com',
+        imgApi: 'https://nodeapi.yunser.com',
         // imgApi: 'http://localhost:1026',
-        img1: 'http://img1.yunser.com'
+        img1: 'https://img1.yunser.com'
     }
 }
 

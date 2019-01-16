@@ -1,5 +1,5 @@
 <template>
-    <my-page title="图床">
+    <my-page title="图床" :page="page">
         <div ref="dropArea" class="drop-box"
                 @dragenter="handleDragEnter($event)"
                 @dragleave="handleDragLeave($event)"
@@ -122,8 +122,19 @@
                 size: 'large',
                 activeTab: 'tab1',
                 fileName: 'hello.png',
-                result: ''
-                // result: 'https://ws1.sinaimg.cn/large/0072Lfvtly1ftl4oikxkpj307k02kt8l.jpg'
+                result: '',
+                // result: 'https://ws1.sinaimg.cn/large/0072Lfvtly1ftl4oikxkpj307k02kt8l.jpg',
+                page: {
+                    menu: [
+                        {
+                            type: 'icon',
+                            icon: 'help',
+                            href: 'https://project.yunser.com/products/1f286520e8f611e8aff245d55fdd8a72',
+                            target: '_blank',
+                            title: '帮助'
+                        }
+                    ]
+                }
             }
         },
         computed: {
