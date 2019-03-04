@@ -6,6 +6,7 @@
                     <input id="file" type="file" name="logo" class="from-control">
                 </div>
                 <div class="tip">支持 10+ 种格式，包含 md、jpg、png 等。生成的链接有效期为 2 天，你可以复制链接分享文件给其他人查看。</div>
+                <div class="tip">文件大小不能超过 10M，如需上传更大到文件，请联系管理员</div>
                 <ui-raised-button class="btn" label="上传" primary @click="upload" />
 
                 <div v-if="result">

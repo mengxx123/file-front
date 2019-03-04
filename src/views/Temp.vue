@@ -4,9 +4,12 @@
             <div class="form-group">
                 <input id="file" type="file" name="logo" class="from-control">
             </div>
+            <div class="tip">文件大小不能超过 10M，如需上传更大到文件，请联系管理员</div>
           
             <ui-raised-button class="btn" label="上传" primary @click="upload" />
-
+            <div class="ui-loading" v-if="loading">
+                <ui-circular-progress :size="24"/>
+            </div>
             <div v-if="result">
                 {{ result }}
                 <br>
@@ -24,6 +27,7 @@
     export default {
         data () {
             return {
+                loading: false,
                 result: null,
                 page: {
                     menu: [
@@ -60,7 +64,17 @@
                 })
             },
             upload() {
-                let file = document.getElementById('file').files[0];           
+                let file = document.getElementById('file').files[0]
+                const MB = 1024 * 1024
+                console.log(file.size, 10 * MB)
+                if (file.size > 10 * MB) {
+                    this.$message({
+                        type: 'danger',
+                        text: '文件大小不能大于 10 MB'
+                    })
+                    return
+                }
+                this.loading = true
                   let param = new FormData(); //创建form对象
                   param.append('logo',file,file.name);//通过append向form对象添加数据
                   param.append('chunk','0');//添加form表单中其他数据
@@ -72,6 +86,7 @@
                   .then(response=>{
                     console.log(response.data);
                     this.result = domain.imgApi + response.data.data.path.replace('public', '')
+                    this.loading = false
                   })        
             }
         }
@@ -79,6 +94,10 @@
 </script>
 
 <style scoped>
+    .tip {
+        margin: 16px 0;
+        color: #999;
+    }
     .btn {
         margin-top: 16px;
         margin-bottom: 16px;
