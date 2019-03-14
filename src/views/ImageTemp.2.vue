@@ -1,8 +1,5 @@
 <template>
     <my-page title="图床" :page="page">
-        <div class="temp-close">
-            图床功能暂时关闭
-        </div>
         <div ref="dropArea" class="drop-box"
                 @dragenter="handleDragEnter($event)"
                 @dragleave="handleDragLeave($event)"
@@ -209,7 +206,7 @@
                 let reader = new FileReader()
                 // let file = document.getElementById('file').files[0];
                 let param = new FormData()
-                param.append('iufile', file, file.name)
+                param.append('smfile', file, file.name)
                 param.append('ssl', true)
                 console.log(param.get('file'))
                 let config = {
@@ -217,7 +214,7 @@
                 };  //添加请求头
                 this.loading = true        
                 this.result = null        
-                this.$http.post('https://www.17uw.cn/api/upload/weibo', param, config)
+                this.$http.post('https://sm.ms/api/upload', param, config)
                     .then(response => {
                         console.log(response.data);
                         this.fileName = response.data.data.filename
@@ -280,13 +277,6 @@
 </script>
 
 <style lang="scss" scoped>
-    .temp-close {
-        font-size: 24px;
-        color: #f00;
-        font-weight: bold;
-        text-align: center;
-        margin: 16px 0;
-    }
     .drop-box{
         max-width: 480px;
         margin: 0 auto 24px auto;
