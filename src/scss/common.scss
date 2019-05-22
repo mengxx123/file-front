@@ -1,9 +1,7 @@
-.ui-page-body {
-    -webkit-overflow-scrolling : touch;
-}
-input,
-textarea {
-  -webkit-appearance: none;
+.common-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 16px 16px 80px 16px;
 }
 
 
@@ -60,3 +58,9 @@ textarea {
         padding: 16px;
     }
 }
+
+.common-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 16px 16px 80px 16px;
+  }

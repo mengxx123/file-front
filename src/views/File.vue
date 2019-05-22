@@ -1,27 +1,23 @@
 <template>
     <my-page title="我的文件">
-        <input type="file" value="上传文件" @change="filechange($event)">
-        <ui-list v-if="files.length">
-            <ui-list-item :title="file.name" describeText="Jan 9, 2014" 
-                v-for="file in files" :key="file.id">
-                <ui-icon-menu slot="right" icon="more_vert" tooltip="操作">
-                    <ui-menu-item title="打开" @click="open(file)" />
-                    <ui-menu-item title="复制" />
-                    <ui-menu-item title="删除" @click="remove(file)" />
-                </ui-icon-menu>
-            </ui-list-item>
-        </ui-list>
-        <button @click="upload">上传</button>
-        =========
-        <form action="http://localhost:1026/net/files" method="post" enctype="multipart/form-data">
-            <h2>单文件上传</h2>
-            <div class="form-group">
-                <input type="file" name="logo" class="from-control">
-            </div>
-            <button type="submit" class="btn btn-default">上传</button>
-        </form>
-        ===
-        <input id="input-file" type="file" @change="filechange($event)" style="display: none">
+        <div class="common-container container">
+            <input id="file" type="file" name="logo" class="from-control">
+            <button @click="upload">上传</button>
+
+            <a href="javascript:;" v-if="!$store.state.user" @click="login">点击登陆</a>
+            <!-- <input type="file" value="上传文件" @change="filechange($event)"> -->
+            <div v-if="!files.length">没有任何文件</div>
+            <ui-list v-if="files.length">
+                <ui-list-item :title="file.name" describeText="Jan 9, 2014" 
+                    v-for="file in files" :key="file.id">
+                    <ui-icon-menu slot="right" icon="more_vert" tooltip="操作">
+                        <ui-menu-item title="打开" @click="open(file)" />
+                        <!-- <ui-menu-item title="复制" /> -->
+                        <ui-menu-item title="删除" @click="remove(file)" />
+                    </ui-icon-menu>
+                </ui-list-item>
+            </ui-list>
+        </div>
         
         <ui-dialog title="确认删除" :open="dialog">
             确认删除文件
@@ -32,6 +28,8 @@
 </template>
 
 <script>
+    /* eslint-disable */
+    import oss from '@/util/oss'
     import {domain} from '@/config'
 
     export default {
@@ -42,19 +40,25 @@
             }
         },
         mounted() {
+            if (!this.$store.state.user) {
+                // this.login()
+            }
             this.init()
         },
         methods: {
+            login() {
+                location.href = oss.getOauthUrl()
+            },
             init() {
                 this.refresh()
             },
             open(file) {
-                window.open(domain.img1 + file.url)
+                window.open(file.url)
             },
             refresh() {
                 let userId = this.$storage.get('user').id
 
-                this.$http.get(`/users/${userId}/files`)
+                this.$http.get(`/cloud/files`)
                     .then(response => {
                         let data = response.data
                         console.log(data)
@@ -65,11 +69,40 @@
                     })
             },
             upload() {
-                document.getElementById('input-file').click()
+                let file = document.getElementById('file').files[0]
+                const MB = 1024 * 1024
+                console.log(file.size, 10 * MB)
+                if (file.size > 10 * MB) {
+                    this.$message({
+                        type: 'danger',
+                        text: '文件大小不能大于 10 MB'
+                    })
+                    return
+                }
+                this.loading = true
+                let param = new FormData()
+                param.append('logo', file, file.name)
+                param.append('chunk', '0')
+                console.log(param.get('file')); //FormData私有类对象，访问不到，可以通过get判断值是否传进去
+                let config = {
+                    headers:{'Content-Type':'multipart/form-data'}
+                };  //添加请求头
+                this.$http.post('/net/files',param,config)
+                    .then(response => {
+                        console.log('上传成功')
+                        console.log(response.data.data.path);
+                        this.$http.post('/cloud/files', {
+                            path: response.data.data.path
+                        })
+                            .then(response => {
+                                console.log('上传成功')
+                                this.refresh()
+                            })  
+                    })        
             },
             removeFile() {
                 this.dialog = false
-                this.$http.delete(domain.imgApi + '/files/' + this.removeFileId)
+                this.$http.delete(`/cloud/files/${this.removeFileId}`)
                     .then(response => {
                         let data = response.data
                         console.log(data)

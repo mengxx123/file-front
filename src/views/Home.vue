@@ -1,6 +1,8 @@
 <template>
     <my-page title="文件" :page="page">
-        <app-list :data="groups" />
+        <div class="common-container container">
+            <app-list :data="groups" />
+        </div>
     </my-page>
 </template>
 
@@ -13,6 +15,12 @@
                     {
                         name: '基本',
                         apps: [
+                            {
+                                name: '网盘',
+                                desc: '',
+                                icon: '/static/img/file.svg',
+                                to: '/files'
+                            },
                             {
                                 name: '临时网盘',
                                 desc: '',

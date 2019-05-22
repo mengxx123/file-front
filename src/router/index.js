@@ -10,12 +10,14 @@ const Error404 = resolve => require(['@/views/error/Error404'], resolve)
 
 // 文件
 const Viewer = resolve => require(['@/views/Viewer'], resolve)
-const File = resolve => require(['@/views/file/File'], resolve)
-const File2 = resolve => require(['@/views/file/File2'], resolve)
+const File1 = resolve => require(['@/views/file/File'], resolve)
+const File = resolve => require(['@/views/File'], resolve)
 const FileDetail = resolve => require(['@/views/file/FileDetail'], resolve)
 const FileEdit = resolve => require(['@/views/file/FileEdit'], resolve)
 const Trash = resolve => require(['@/views/file/Trash'], resolve)
 const ImageTemp = resolve => require(['@/views/ImageTemp'], resolve)
+
+// const ImageTemp = resolve => require(['@/views/ImageTemp'], resolve)
 
 Vue.use(Router)
 
@@ -61,13 +63,17 @@ let routes = [
         }
     },
     // 文件相关
+    // {
+    //     path: '/files',
+    //     component: File
+    // },
+    {
+        path: '/files1',
+        component: File1
+    },
     {
         path: '/files',
         component: File
-    },
-    {
-        path: '/files2',
-        component: File2
     },
     {
         path: '/files/:path/edit',

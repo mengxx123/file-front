@@ -1,74 +1,75 @@
 <template>
     <my-page title="图床" :page="page">
-        <div class="temp-close">
-            图床功能暂时关闭
-        </div>
-        <div ref="dropArea" class="drop-box"
-                @dragenter="handleDragEnter($event)"
-                @dragleave="handleDragLeave($event)"
-                @drop="handleDrop($event)"
-                @dragover='allowDrop($event)'>
-            <ui-raised-button class="file-select-btn" label="上传文件" primary>
-                <!-- <input type="file" class="ui-file-button" accept="image/*" @change="fileChange($event)"> -->
-                <input type="file" class="ui-file-button" @change="fileChange($event)">
-            </ui-raised-button>
-            <div class="text">把文件拖到这里，快速上传</div>
-            <!-- <div class="text2">单张图片最大 5M，一次最多同时上传10张</div> -->
-            <div class="text2">单张图片最大 5M，暂不支持批量上传</div>
-        </div>
-        <div class="ui-loading" v-if="loading">
-            <ui-circular-progress :size="24"/>
-        </div>
-        <!-- {{ result }} -->
-        <div class="my-tab" v-if="result">
-            <ui-select-field v-model="size" label="大小">
-                <ui-menu-item value="large" title="原图"/>
-                <ui-menu-item value="square" title="80 x 80"/>
-                <ui-menu-item value="thumb150" title="150 x 150"/>
-                <ui-menu-item value="small" title="宽 200"/>
-                <ui-menu-item value="bmiddle" title="宽 440"/>
-                <ui-menu-item value="orj360" title="宽 480"/>
-                <ui-menu-item value="orj480" title="宽 640"/>
-                <ui-menu-item value="mw690" title="宽 690"/>
-                <ui-menu-item value="mw1024" title="宽 1024"/>
-                <ui-menu-item value="mw2048" title="宽 2048"/>
-            </ui-select-field>
-            <ui-tabs class="type-tab" :value="activeTab" @change="handleTabChange">
-                <ui-tab value="tab1" title="链接"/>
-                <ui-tab value="tab2" title="HTML"/>
-                <ui-tab value="tab3" title="论坛 BBCode"/>
-                <ui-tab value="tab4" title="Markdown"/>
-                <ui-tab value="tab5" title="Markdown 带链接"/>
-            </ui-tabs>
-            <div class="tab-box">
-                <div v-if="activeTab === 'tab1'">
-                    <pre><code>{{ result }}</code></pre>
-                    <ui-raised-button class="btn" label="复制" :data-clipboard-text="result" />
-                </div>
-                <div v-if="activeTab === 'tab2'">
-                    <pre><code>{{ html }}</code></pre>
-                </div>
-                <div v-if="activeTab === 'tab3'">
-                    <pre><code>{{ bbcode }}</code></pre>
-                </div>
-                <div v-if="activeTab === 'tab4'">
-                    <pre><code>{{ markdown }}</code></pre>
-                </div>
-                <div v-if="activeTab === 'tab5'">
-                    <pre><code>{{ markdownLink }}</code></pre>
+        <div class="common-container container">
+            <div class="temp-close">
+                图床功能暂时关闭
+            </div>
+            <div ref="dropArea" class="drop-box"
+                    @dragenter="handleDragEnter($event)"
+                    @dragleave="handleDragLeave($event)"
+                    @drop="handleDrop($event)"
+                    @dragover='allowDrop($event)'>
+                <ui-raised-button class="file-select-btn" label="上传文件" primary>
+                    <!-- <input type="file" class="ui-file-button" accept="image/*" @change="fileChange($event)"> -->
+                    <input type="file" class="ui-file-button" @change="fileChange($event)">
+                </ui-raised-button>
+                <div class="text">把文件拖到这里，快速上传</div>
+                <!-- <div class="text2">单张图片最大 5M，一次最多同时上传10张</div> -->
+                <div class="text2">单张图片最大 5M，暂不支持批量上传</div>
+            </div>
+            <div class="ui-loading" v-if="loading">
+                <ui-circular-progress :size="24"/>
+            </div>
+            <!-- {{ result }} -->
+            <div class="my-tab" v-if="result">
+                <ui-select-field v-model="size" label="大小">
+                    <ui-menu-item value="large" title="原图"/>
+                    <ui-menu-item value="square" title="80 x 80"/>
+                    <ui-menu-item value="thumb150" title="150 x 150"/>
+                    <ui-menu-item value="small" title="宽 200"/>
+                    <ui-menu-item value="bmiddle" title="宽 440"/>
+                    <ui-menu-item value="orj360" title="宽 480"/>
+                    <ui-menu-item value="orj480" title="宽 640"/>
+                    <ui-menu-item value="mw690" title="宽 690"/>
+                    <ui-menu-item value="mw1024" title="宽 1024"/>
+                    <ui-menu-item value="mw2048" title="宽 2048"/>
+                </ui-select-field>
+                <ui-tabs class="type-tab" :value="activeTab" @change="handleTabChange">
+                    <ui-tab value="tab1" title="链接"/>
+                    <ui-tab value="tab2" title="HTML"/>
+                    <ui-tab value="tab3" title="论坛 BBCode"/>
+                    <ui-tab value="tab4" title="Markdown"/>
+                    <ui-tab value="tab5" title="Markdown 带链接"/>
+                </ui-tabs>
+                <div class="tab-box">
+                    <div v-if="activeTab === 'tab1'">
+                        <pre><code>{{ result }}</code></pre>
+                        <ui-raised-button class="btn" label="复制" :data-clipboard-text="result" />
+                    </div>
+                    <div v-if="activeTab === 'tab2'">
+                        <pre><code>{{ html }}</code></pre>
+                    </div>
+                    <div v-if="activeTab === 'tab3'">
+                        <pre><code>{{ bbcode }}</code></pre>
+                    </div>
+                    <div v-if="activeTab === 'tab4'">
+                        <pre><code>{{ markdown }}</code></pre>
+                    </div>
+                    <div v-if="activeTab === 'tab5'">
+                        <pre><code>{{ markdownLink }}</code></pre>
+                    </div>
                 </div>
             </div>
-        </div>
-        <!-- <form action="http://localhost:1026/net/files" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <input id="file" type="file" name="logo" class="from-control">
-            </div>
-          
-            <ui-raised-button class="btn" label="上传" primary @click="upload" />
+            <!-- <form action="http://localhost:1026/net/files" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <input id="file" type="file" name="logo" class="from-control">
+                </div>
+            
+                <ui-raised-button class="btn" label="上传" primary @click="upload" />
 
-            <div v-if="result">{{ result }}</div>
-        </form> -->
-        
+                <div v-if="result">{{ result }}</div>
+            </form> -->
+        </div>
     </my-page>
 </template>
 
